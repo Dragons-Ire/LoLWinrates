@@ -6,6 +6,14 @@ from os import listdir
 from os.path import isfile
 import re
 
+def progressBar(current, total, fullProgressBar=20):
+    frac = current/total
+    filledProgressBar = round(frac*fullProgressBar)
+    if current == 0:
+        print('#'*filledProgressBar + '-'*(fullProgressBar-filledProgressBar), '[{:>7.2%}]'.format(frac), end='')
+    else:
+        print('\r', '#'*filledProgressBar + '-'*(fullProgressBar-filledProgressBar), '[{:>7.2%}]'.format(frac), end='')
+
 def playerDictBuilder(apiKey, region, maxPlayers=10000, accountId=''):
     #setup watcher and default values
     watcher = RiotWatcher(apiKey)
@@ -91,8 +99,9 @@ def playerDictBuilder(apiKey, region, maxPlayers=10000, accountId=''):
         
         #search all new matches for player ids (summoner and account)
         #add new player ids to list of ids and unused list
-        playersAdded = 0
+        currentCount = 0
         for game in gamesFound:
+            progressBar(currentCount, len(gamesFound))
             while True:
                 try:
                     currentMatch = watcher.match.by_id(myRegion, game)
@@ -111,14 +120,14 @@ def playerDictBuilder(apiKey, region, maxPlayers=10000, accountId=''):
                     continue
                 playerSummonerList.append(participant['player']['summonerId'])
                 unusedAccountPlayers.append(participant['player']['accountId'])
-                playersAdded += 1
-                
-            print('    players to be added: ' + repr(playersAdded), end='\r')
-        print('    players to be added: ' + repr(playersAdded))
+            currentCount += 1
         
         
         #get the rank and tier of the new players then add them to dict
+        print('players to be added: ' + repr(len(playerSummonerList)))
+        currentCount = 0
         for player in playerSummonerList:
+            progressBar(currentCount, len(playerSummonerList))
             while True:
                 try:
                     currentPlayer = watcher.league.by_summoner(myRegion, player)
@@ -133,6 +142,7 @@ def playerDictBuilder(apiKey, region, maxPlayers=10000, accountId=''):
             for i in currentPlayer:
                 if i['queueType'] == 'RANKED_SOLO_5x5':
                     playerDict[player] = [i['tier'], i['rank']]
+            currentCount += 1
         print('added ' + repr(len(playerDict) - playerDictLength) + ' new players to dictionary')
         usedAccountPlayers.append(playerId)
         
