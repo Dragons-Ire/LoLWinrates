@@ -9,8 +9,8 @@ import re
 def progressBar(current, total, fullProgressBar=20):
     frac = current/total
     filledProgressBar = round(frac*fullProgressBar)
-    if current == 0:
-        print('#'*filledProgressBar + '-'*(fullProgressBar-filledProgressBar), '[{:>7.2%}]'.format(frac), end='')
+    if current == total:
+        print('\r', '#'*filledProgressBar + '-'*(fullProgressBar-filledProgressBar), '[{:>7.2%}]'.format(frac))
     else:
         print('\r', '#'*filledProgressBar + '-'*(fullProgressBar-filledProgressBar), '[{:>7.2%}]'.format(frac), end='')
 
